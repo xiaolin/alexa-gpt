@@ -24,15 +24,14 @@ class LaunchRequestHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speak_output = "Fast Pass up in here, What's up?"
+        speak_output = "What's up?"
 
         session_attr = handler_input.attributes_manager.session_attributes
         session_attr["chat_history"] = []
-
         return (
             handler_input.response_builder
-                .speak(speak_output)
-                .ask(speak_output)
+                .speak(f"<voice name='Salli'>{speak_output}</voice>")
+                .ask(f"<voice name='Salli'>{speak_output}</voice>")
                 .response
         )
 
@@ -51,7 +50,7 @@ class GptQueryIntentHandler(AbstractRequestHandler):
             speak_output = get_goodbye_phrase()
             return (
                 handler_input.response_builder
-                    .speak(speak_output)
+                    .speak(f"<voice name='Salli'>{speak_output}</voice>")
                     .set_should_end_session(True)  # End the session
                     .response
             )
@@ -64,8 +63,8 @@ class GptQueryIntentHandler(AbstractRequestHandler):
 
         return (
                 handler_input.response_builder
-                    .speak(response)
-                    .ask("Anything else?")
+                    .speak(f"<voice name='Salli'>{response}</voice>")
+                    .ask(f"<voice name='Salli'>Anything else?</voice>")
                     .response
             )
 
@@ -83,8 +82,8 @@ class CatchAllExceptionHandler(AbstractExceptionHandler):
 
         return (
             handler_input.response_builder
-                .speak(speak_output)
-                .ask(speak_output)
+                .speak(f"<voice name='Salli'>{speak_output}</voice>")
+                .ask(f"<voice name='Salli'>{speak_output}</voice>")
                 .response
         )
 
@@ -99,7 +98,7 @@ class CancelOrStopIntentHandler(AbstractRequestHandler):
         speak_output = get_goodbye_phrase()
         return (
             handler_input.response_builder
-                .speak(speak_output)
+                .speak(f"<voice name='Salli'>{speak_output}</voice>")
                 .response
         )
 
