@@ -30,8 +30,8 @@ class LaunchRequestHandler(AbstractRequestHandler):
         session_attr["chat_history"] = []
         return (
             handler_input.response_builder
-                .speak(f"<voice name='Salli'>{speak_output}</voice>")
-                .ask(f"<voice name='Salli'>{speak_output}</voice>")
+                .speak(get_ssml_voice(speak_output))
+                .ask(get_ssml_voice(speak_output))
                 .response
         )
 
@@ -50,7 +50,7 @@ class GptQueryIntentHandler(AbstractRequestHandler):
             speak_output = get_goodbye_phrase()
             return (
                 handler_input.response_builder
-                    .speak(f"<voice name='Salli'>{speak_output}</voice>")
+                    .speak(get_ssml_voice(speak_output))
                     .set_should_end_session(True)  # End the session
                     .response
             )
@@ -58,13 +58,13 @@ class GptQueryIntentHandler(AbstractRequestHandler):
         session_attr = handler_input.attributes_manager.session_attributes
         if "chat_history" not in session_attr:
             session_attr["chat_history"] = []
-        response = generate_gpt_response(session_attr["chat_history"], query)
-        session_attr["chat_history"].append((query, response))
+        speak_output = generate_gpt_response(session_attr["chat_history"], query)
+        session_attr["chat_history"].append((query, speak_output))
 
         return (
                 handler_input.response_builder
-                    .speak(f"<voice name='Salli'>{response}</voice>")
-                    .ask(f"<voice name='Salli'>Anything else?</voice>")
+                    .speak(get_ssml_voice(speak_output))
+                    .ask(get_ssml_voice("Anything else?"))
                     .response
             )
 
@@ -82,8 +82,8 @@ class CatchAllExceptionHandler(AbstractExceptionHandler):
 
         return (
             handler_input.response_builder
-                .speak(f"<voice name='Salli'>{speak_output}</voice>")
-                .ask(f"<voice name='Salli'>{speak_output}</voice>")
+                .speak(get_ssml_voice(speak_output))
+                .ask(get_ssml_voice(speak_output))
                 .response
         )
 
@@ -98,9 +98,12 @@ class CancelOrStopIntentHandler(AbstractRequestHandler):
         speak_output = get_goodbye_phrase()
         return (
             handler_input.response_builder
-                .speak(f"<voice name='Salli'>{speak_output}</voice>")
+                .speak(get_ssml_voice(speak_output))
                 .response
         )
+
+def get_ssml_voice(text):
+    return f"<voice name='Salli'>{text}</voice>"
 
 def get_goodbye_phrase():
     goodbye_phrases = [
