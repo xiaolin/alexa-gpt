@@ -79,7 +79,7 @@ class CatchAllExceptionHandler(AbstractExceptionHandler):
         # type: (HandlerInput, Exception) -> Response
         logger.error(exception, exc_info=True)
 
-        speak_output = "Sorry, I didn't catch that, can you repeat that?"
+        speak_output = "Fast pass is broken, something went wrong, check them logs"
 
         return (
             handler_input.response_builder
