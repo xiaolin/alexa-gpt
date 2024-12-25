@@ -7,11 +7,12 @@ import ask_sdk_core.utils as ask_utils
 import requests
 import logging
 import json
+import random
 
 # Set your OpenAI API key
-api_key = "YOUR_API_KEY"
+api_key = "your_openai_api_key"
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 class LaunchRequestHandler(AbstractRequestHandler):
@@ -23,7 +24,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speak_output = "Chat G.P.T. mode activated"
+        speak_output = "What's up?"
 
         session_attr = handler_input.attributes_manager.session_attributes
         session_attr["chat_history"] = []
@@ -44,6 +45,16 @@ class GptQueryIntentHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
         query = handler_input.request_envelope.request.intent.slots["query"].value
+        
+        # if response to "anything else?" is exactly "no"
+        if query and query.strip().lower() == "no":
+            speak_output = get_goodbye_phrase()
+            return (
+                handler_input.response_builder
+                    .speak(speak_output)
+                    .set_should_end_session(True)  # End the session
+                    .response
+            )
 
         session_attr = handler_input.attributes_manager.session_attributes
         if "chat_history" not in session_attr:
@@ -54,7 +65,7 @@ class GptQueryIntentHandler(AbstractRequestHandler):
         return (
                 handler_input.response_builder
                     .speak(response)
-                    .ask("Any other questions?")
+                    .ask("Anything else?")
                     .response
             )
 
@@ -68,7 +79,7 @@ class CatchAllExceptionHandler(AbstractExceptionHandler):
         # type: (HandlerInput, Exception) -> Response
         logger.error(exception, exc_info=True)
 
-        speak_output = "Sorry, I had trouble doing what you asked. Please try again."
+        speak_output = "Sorry, I didn't catch that, can you repeat that?"
 
         return (
             handler_input.response_builder
@@ -85,14 +96,21 @@ class CancelOrStopIntentHandler(AbstractRequestHandler):
                 ask_utils.is_intent_name("AMAZON.StopIntent")(handler_input))
 
     def handle(self, handler_input):
-        # type: (HandlerInput) -> Response
-        speak_output = "Leaving Chat G.P.T. mode"
-
+        speak_output = get_goodbye_phrase()
         return (
             handler_input.response_builder
                 .speak(speak_output)
                 .response
         )
+
+def get_goodbye_phrase():
+    goodbye_phrases = [
+        "Cool cool, see ya next time",
+        "Okay, see ya",
+        "Until next time, take care!",
+        "Peace out, see you soon!",
+    ]
+    return random.choice(goodbye_phrases)
 
 def generate_gpt_response(chat_history, new_question):
     """Generates a GPT response to a new question"""
@@ -101,17 +119,17 @@ def generate_gpt_response(chat_history, new_question):
         "Content-Type": "application/json"
     }
     url = "https://api.openai.com/v1/chat/completions"
-    messages = [{"role": "system", "content": "You are a helpful assistant. Answer in 50 words or less."}]
-    for question, answer in chat_history[-10:]:
+    messages = [{"role": "system", "content": "You are a helpful assistant that prioritizes answering in one sentence."}]
+    for question, answer in chat_history[-50:]:
         messages.append({"role": "user", "content": question})
         messages.append({"role": "assistant", "content": answer})
     messages.append({"role": "user", "content": new_question})
     
     data = {
-        "model": "gpt-4o-mini",
+        "model": "gpt-4o",
         "messages": messages,
-        "max_tokens": 300,
-        "temperature": 0.5
+        # "max_tokens": 300,
+        # "temperature": 0.5
     }
     try:
         response = requests.post(url, headers=headers, data=json.dumps(data))
