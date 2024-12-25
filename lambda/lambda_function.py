@@ -24,7 +24,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speak_output = "What's up?"
+        speak_output = "Fast Pass up in here, What's up?"
 
         session_attr = handler_input.attributes_manager.session_attributes
         session_attr["chat_history"] = []
